@@ -1,0 +1,39 @@
+name: release-scientist
+
+# Builds the fork-specific provider binaries (linux/amd64, linux/arm64,
+# darwin/arm64) on push of a tag like v5.3.0-scientist.1.
+#
+# Differs from the upstream release workflow:
+#   - no wait-for-status step (the fork has no parallel acceptance-test run)
+#   - no GPG signing (filesystem mirrors used by infra-CI don't verify sigs)
+#   - uses .goreleaser.scientist.yml so as not to perturb the upstream config
+
+on:
+  push:
+    tags:
+      - "v*-scientist.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: GoReleaser
+        uses: goreleaser/goreleaser-action@1a80836c5c9d9e5755a25cb59ec6f45a3b5f41a8
+        with:
+          args: release --clean --config .goreleaser.scientist.yml --skip=sign
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

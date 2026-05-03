@@ -36,6 +36,9 @@ site/
 # releases
 *.zip
 
+# GoReleaser output (artifacts.json, raw binaries, etc. not matched above)
+dist/
+
 # Keycloak access token
 keycloak_access_token
 
